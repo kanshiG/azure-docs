@@ -65,29 +65,23 @@ Now let's clone a  DocumentDB API app from github, set the connection string, an
 
 ## Review the code
 
-Let's make a quick review of what's happening in the app. Open the DocumentDBRepository.cs file and you'll find that these lines of code create the Azure Cosmos DB resources. 
+Let's make a quick review of what's happening in the app. Open the Program.cs file and you'll find that these lines of code create the Azure Cosmos DB resources. 
 
 * The DocumentClient is initialized.
 
     ```csharp
-    client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);`
+     CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
+     CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
     ```
 
-* A new database is created.
+* A new Table container if it does not exist is created.
 
     ```csharp
-    await client.CreateDatabaseAsync(new Database { Id = DatabaseId });
+    CloudTable table = tableClient.GetTableReference("people");
+    table.CreateIfNotExists();
     ```
 
-* A new graph container is created.
-
-    ```csharp
-    await client.CreateDocumentCollectionAsync(
-        UriFactory.CreateDatabaseUri(DatabaseId),
-        new DocumentCollection { Id = CollectionId },
-        new RequestOptions { OfferThroughput = 1000 });
-    ```
-
+ 
 ## Update your connection string
 
 Now go back to the Azure portal to get your connection string information and copy it into the app.
@@ -101,7 +95,7 @@ Now go back to the Azure portal to get your connection string information and co
 3. Copy your Azure Cosmos DB account name from the portal and make it the value of the AccountName in the PremiumStorageConnection string value in app.config. In the screenshot above, the account name is cosmos-db-quickstart. Your account name is in displayed at the top of the portal.
 
     `<add key="PremiumStorageConnectionString" 
-        value="DefaultEndpointsProtocol=https;AccountName=MYSTORAGEACCOUNT;AccountKey=AUTHKEY;TableEndpoint=https://COSMODB.documents.azure.com" />`
+        value="DefaultEndpointsProtocol=https;AccountName=MYSTORAGEACCOUNT;AccountKey=AUTHKEY;TableEndpoint=https://COSMOSDB.documents.azure.com" />`
 
 4. Then copy your PRIMARY KEY value from the portal and make it the value of the AccountKey in PremiumStorageConnectionString. 
 
@@ -109,7 +103,7 @@ Now go back to the Azure portal to get your connection string information and co
 
 5. Finally, copy your URI value from the Keys page of the portal (using the copy button) and make it the value of the TableEndpoint of the PremiumStorageConnectionString.
 
-    `TableEndpoint=https://COSMODB.documents.azure.com`
+    `TableEndpoint=https://COSMOSDB.documents.azure.com`
 
     You can leave the StandardStorageConnectionString as is.
 
@@ -121,7 +115,7 @@ You've now updated your app with all the info it needs to communicate with Azure
 
 2. In the NuGet **Browse** box, type *WindowsAzure.Storage* and check the **Include prerelease** box. 
 
-3. From the results, install the **WindowsAzure.Storage** library. This installs the preview Azure Cosmos DB Table API package as well as all dependencies.
+3. From the results, install the **WindowsAzure.Storage** library. This installs the preview Azure Cosmos DB Table API (preview) package as well as all dependencies.
 
 4. Click CTRL + F5 to run the application.
 
